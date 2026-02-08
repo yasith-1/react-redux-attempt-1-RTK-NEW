@@ -11,7 +11,7 @@ function ReduxTest() {
   // 'state.cart' එකෙන් cart එකේ count එක ගන්නවා.
   const { count } = useAppSelector((state) => state.cart);
   // 'state.products' එකෙන් items සහ status එක ගන්නවා.
-  const { items, status } = useAppSelector((state) => state.products);
+  const { items, status, error } = useAppSelector((state) => state.products);
 
   // App එක load වෙද්දීම API එකෙන් බඩු ටික ගේමු.
   useEffect(() => {
@@ -32,6 +32,9 @@ function ReduxTest() {
 
       {/* Loading වෙනකොට පොඩි message එකක් පෙන්වන්න */}
       {status === 'loading' && <p>Loading products...</p>}
+
+      {/* Error එකක් ආවොත් ඒක පෙන්වන්න */}
+      {status === 'failed' && <p style={{ color: 'red' }}>Error: {error}</p>}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
         {/* Products ටික map කරලා පෙන්නන්න */}
