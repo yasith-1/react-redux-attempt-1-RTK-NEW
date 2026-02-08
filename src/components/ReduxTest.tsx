@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // React සහ useEffect hook එක
+import { useEffect } from 'react'; // React සහ useEffect hook එක
 import { useAppSelector, useAppDispatch } from '../store/hooks'; // අපි හදාගත් typed hooks import කිරීම.
 import { addToCart } from '../features/cart/cartSlice'; // Cart එකට බඩු දාන action එක.
 import { fetchProducts, type Product } from '../features/products/productSlice'; // Products ගෙන්වන thunk සහ Product type එක.
