@@ -4,6 +4,7 @@ import ReduxTest from './components/ReduxTest'
 function App() {
   return (
     <>
+      {/* Redux පරීක්ෂා කරන අපගේ ප්‍රධාන Component එක */}
       <ReduxTest />
     </>
   )

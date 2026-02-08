@@ -7,6 +7,7 @@ import store from './store/store.ts';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    {/* Provider එක මගින් මුළු Application එකටම Redux store එක ලබා දෙයි */}
     <Provider store={store}>
       <App />
     </Provider>

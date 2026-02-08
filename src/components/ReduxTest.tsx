@@ -1,118 +1,52 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import type { RootState, AppDispatch } from '../store/store';
-import { fetchProducts } from '../features/products/productSlice';
-import { addToCart } from '../features/cart/cartSlice';
+import React, { useEffect } from 'react'; // React සහ useEffect hook එක
+import { useAppSelector, useAppDispatch } from '../store/hooks'; // අපි හදාගත් typed hooks import කිරීම.
+import { addToCart } from '../features/cart/cartSlice'; // Cart එකට බඩු දාන action එක.
+import { fetchProducts, type Product } from '../features/products/productSlice'; // Products ගෙන්වන thunk සහ Product type එක.
 
 function ReduxTest() {
-    const dispatch = useDispatch<AppDispatch>();
+  // Dispatch function එක ලබා ගැනීම (Actions යවන්න).
+  const dispatch = useAppDispatch();
 
-    // Store එකෙන් දත්ත ලබා ගැනීම
-    const { count } = useSelector((state: RootState) => state.cart);
-    const { items, status } = useSelector((state: RootState) => state.products);
+  // Store එකෙන් දත්ත (State) ලබා ගැනීම (Reading State).
+  // 'state.cart' එකෙන් cart එකේ count එක ගන්නවා.
+  const { count } = useAppSelector((state) => state.cart);
+  // 'state.products' එකෙන් items සහ status එක ගන්නවා.
+  const { items, status } = useAppSelector((state) => state.products);
 
-    // App එක load වෙද්දීම API එකෙන් බඩු ටික ගේමු
-    useEffect(() => {
-        dispatch(fetchProducts());
-    }, [dispatch]);
+  // App එක load වෙද්දීම API එකෙන් බඩු ටික ගේමු.
+  useEffect(() => {
+    // Component එක mount වුනාම 'fetchProducts' action එක dispatch කරනවා.
+    dispatch(fetchProducts());
+  }, [dispatch]); // dispatch වෙනස් වුනොත් විතරක් ආයේ දුවන්න (සාමාන්‍යයෙන් මේක වෙනස් වෙන්නේ නෑ).
 
-    return (
-        <div style={styles.container}>
-            <div style={styles.header}>
-                <h1>RTK Shopping Store</h1>
-                <h3 style={{ margin: 0 }}>
-                    Cart Items: <span style={styles.cartBadge}>{count}</span>
-                </h3>
-            </div>
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>RTK Shopping Store</h1>
 
-            <hr style={{ borderColor: '#444' }} />
+      {/* Cart එකේ තියෙන Items ගණන පෙන්වීම */}
+      <h3>Cart Items: {count}</h3>
 
-            <h2>Products</h2>
-            {status === 'loading' && <p>Loading products...</p>}
+      <hr />
 
-            <div style={styles.grid}>
-                {items.map((product) => (
-                    <div key={product.id} style={styles.card}>
-                        <p>{product.title.substring(0, 20)}...</p>
-                        <button 
-                            onClick={() => dispatch(addToCart())}
-                            style={styles.primaryButton}
-                        >
-                            Add to Cart
-                        </button>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+      <h2>Products</h2>
+
+      {/* Loading වෙනකොට පොඩි message එකක් පෙන්වන්න */}
+      {status === 'loading' && <p>Loading products...</p>}
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+        {/* Products ටික map කරලා පෙන්නන්න */}
+        {items.map((product: Product) => (
+          <div key={product.id} style={{ border: '1px solid #ccc', padding: '10px', width: '150px' }}>
+            {/* නම දිග වැඩි නම් මුල් අකුරු 20 විතරක් පෙන්නන්න */}
+            <p>{product.title.substring(0, 20)}...</p>
+
+            {/* Button එක click කරාම Cart එකට add වෙන්න action එක යවන්න */}
+            <button onClick={() => dispatch(addToCart())}>Add to Cart</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-const styles = {
-    container: {
-        maxWidth: '800px',
-        margin: '0 auto',
-        padding: '20px',
-        color: '#fff',
-    },
-    header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px 20px',
-        backgroundColor: '#333',
-        borderRadius: '12px',
-        marginBottom: '20px',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-    },
-    cartBadge: {
-        backgroundColor: '#444',
-        padding: '8px 15px',
-        borderRadius: '20px',
-        fontWeight: 'bold' as const,
-        border: '1px solid #555',
-    },
-    count: {
-        color: '#646cff',
-        marginLeft: '5px',
-        fontSize: '1.2rem',
-    },
-    grid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: '20px',
-    },
-    card: {
-        backgroundColor: '#2a2a2a',
-        padding: '20px',
-        borderRadius: '12px',
-        border: '1px solid #3a3a3a',
-    },
-    productList: {
-        display: 'flex',
-        flexDirection: 'column' as const,
-        gap: '10px',
-        marginTop: '15px',
-    },
-    productItem: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#333',
-        padding: '10px 15px',
-        borderRadius: '8px',
-    },
-    addButton: {
-        padding: '5px 10px',
-        fontSize: '0.8rem',
-        backgroundColor: '#444',
-    },
-    primaryButton: {
-        width: '100%',
-        marginTop: '10px',
-        backgroundColor: '#646cff',
-        color: 'white',
-        border: 'none',
-    }
-};
-
-export default ReduxTest;
+export default ReduxTest; // Component එක export කිරීම.

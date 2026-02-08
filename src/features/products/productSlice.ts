@@ -1,47 +1,66 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'; // createAsyncThunk: API calls වැනි asynchronous වැඩ කරන්න අවශ්‍ය tool එක import කිරීම.
 
-// 1. API එකෙන් දත්ත ගේන Async Thunk එක
+// 1. API එකෙන් දත්ත ලබා ගැනීමට (Asynchronous) Async Thunk එකක් හදමු.
+// 'products/fetchProducts' යනු Redux action type එකේ නමයි. මෙය debugging වලදී අපිට පේනවා.
 export const fetchProducts = createAsyncThunk('products/fetchProducts', async () => {
-  const response = await fetch('https://fakestoreapi.com/products?limit=5'); // API Call එක
-  return response.json(); // ලැබෙන දත්ත payload එක ලෙස යයි
+  // `fetch` භාවිතා කරලා බාහිර API එකකින් දත්ත ඉල්ලීම (Request).
+  const response = await fetch('https://fakestoreapi.com/products?limit=5');
+  // ලැබෙන දත්ත JSON format එකට හරවනවා. මේක තමයි `action.payload` එක වෙන්නේ.
+  return response.json();
 });
 
+// TypeScript: Product එකේ හැඩය (Structure) මොකක්ද කියලා හඳුන්වා දීම.
 export interface Product {
-    id: number;
-    title: string;
-    price: number;
-    image: string;
-    description: string;
-    category: string;
+  id: number;     // Product එකේ අංකය
+  title: string;  // Product එකේ නම
+  price: number;  // මිල
+  description: string; // විස්තරය
+  category: string; // වර්ගය
+  image: string;  // රූපයේ URL එක
+  rating: {
+    rate: number; // රේටින්ග් අගය
+    count: number; // රේටින්ග් ගණන
+  };
 }
 
+// Slice එකේ State එකේ type එක නිර්මාණය කිරීම.
+// මෙතන අයිතම (items) සහ status එක තියෙන්න ඕන.
 interface ProductState {
-    items: Product[];
-    status: 'idle' | 'loading' | 'success' | 'failed';
+  items: Product[];  // Product වර්ගයේ array එකක්.
+  status: 'idle' | 'loading' | 'success' | 'failed'; // State එකේ අවස්ථා 4 ක්.
 }
 
+// ආරම්භක අගයන් (Initial State) නිර්වචනය කිරීම.
 const initialState: ProductState = {
-    items: [],
-    status: 'idle',
+  items: [],      // මුලින්ම items මුකුත් නෑ (empty array).
+  status: 'idle', // තාම මුකුත් වෙලා නෑ (idle).
 };
 
 const productSlice = createSlice({
-  name: 'products',
-  initialState, // status මගින් loading තත්වය බලමු
-  reducers: {}, 
+  name: 'products', // Slide එකේ නම.
+  initialState,     // උඩ හදාගත් ආරම්භක අගයන් ලබා දීම.
+  reducers: {},     // Synchronous actions (සාමාන්‍ය වෙනස්කම්) අවශ්‍ය නම් මෙතන ලියන්න පුළුවන් (දැනට හිස්ව තබා ඇත).
   extraReducers: (builder) => {
+    // 2. Async Thunk එකෙන් එන අවස්ථා 3 (Pending, Fulfilled, Rejected) මෙතනදී handle කරනවා.
+    // මෙය `switch` statement එකක් වගේ වැඩ කරනවා.
     builder
       .addCase(fetchProducts.pending, (state) => {
-        state.status = 'loading'; // දත්ත එනකල් බලා සිටියි
+        // API call එක යැවූ පසු, දත්ත තාම එන ගමන්.
+        state.status = 'loading';
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.status = 'success'; // දත්ත සාර්ථකව ලැබුණි
-        state.items = action.payload; // API එකෙන් ආපු දත්ත ටික state එකට දාමු
+        // දත්ත සාර්ථකව ලැබුණු විට (Success).
+        state.status = 'success';
+        // API එකෙන් ආපු දත්ත (action.payload) 'items' array එකට දමනවා.
+        state.items = action.payload;
       })
       .addCase(fetchProducts.rejected, (state) => {
-        state.status = 'failed'; // දත්ත ගෙන ඒම අසාර්ථකයි
+        // යම් දෝෂයක් ආවොත් (Error/Failed).
+        state.status = 'failed';
+        // මෙතනදී error message එකක් වුනත් state එකට දාන්න පුළුවන්.
       });
   }
 });
 
+// Reducer එක export කිරීම. Store එකට මෙය එකතු කරගන්න ඕන.
 export default productSlice.reducer;
